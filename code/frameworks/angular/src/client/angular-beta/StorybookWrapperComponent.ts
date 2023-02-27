@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 import {
   AfterViewInit,
   ChangeDetectorRef,
@@ -17,6 +18,14 @@ import { ICollection, NgModuleMetadata } from '../types';
 import { STORY_PROPS } from './StorybookProvider';
 import { ComponentInputsOutputs, getComponentInputsOutputs } from './utils/NgComponentAnalyzer';
 import { PropertyExtractor } from './utils/PropertyExtractor';
+
+let routerModule: any;
+
+try {
+  routerModule = require('@angular/router').RouterModule;
+} catch (e) {
+  routerModule = null;
+}
 
 const getNonInputsOutputsProps = (
   ngComponentInputsOutputs: ComponentInputsOutputs,
@@ -55,6 +64,20 @@ export const createStorybookWrapperComponent = (
   const analyzedMetadata = new PropertyExtractor(moduleMetadata, storyComponent);
   const { imports, declarations, providers } = analyzedMetadata;
 
+  // Filter out RouterModule used with `forRoot` API, because it should only be initialized once.
+  // The RouterModule.forRoot() call happens on the environmental level in `boostrapApplication`
+  // call as well. Therefore ignoring it here.
+  const filteredImports = imports.filter((i) => {
+    try {
+      if (routerModule !== null && i.ngModule === routerModule) {
+        return false;
+      }
+      return true;
+    } catch (e) {
+      return true;
+    }
+  });
+
   // Only create a new module if it doesn't already exist
   // This is to prevent the module from being recreated on every story change
   // Declarations & Imports are only added once
@@ -63,8 +86,8 @@ export const createStorybookWrapperComponent = (
   if (!ngModule) {
     @NgModule({
       declarations,
-      imports,
-      exports: [...declarations, ...imports],
+      imports: filteredImports,
+      exports: [...declarations, ...filteredImports],
     })
     class StorybookComponentModule {}
 
