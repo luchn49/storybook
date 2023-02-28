@@ -767,6 +767,10 @@ _Has automigration_
 
 Storybook now uses [Babel mode v7](#babel-mode-v7) exclusively. In 6.x, Storybook provided its own babel settings out of the box. Now, Storybook's uses your project's babel settings (`.babelrc`, `babel.config.js`, etc.) instead.
 
+> Note:
+> This is only necessary for projects that use the following packages: @storybook/react-webpack5, @storybook/vue-webpack5, @storybook/vue3-webpack5, @storybook/html-webpack5.
+> If you are using @storybook/react-webpack5 with the @storybook/preset-create-react-app package, you can skip this step.
+
 In the new mode, Storybook expects you to provide a configuration file. If you want a configuration file that's equivalent to the 6.x default, you can run the following command in your project directory:
 
 ```sh
